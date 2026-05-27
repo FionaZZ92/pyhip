@@ -1,18 +1,18 @@
 ===================== bb
 _jit_main:	 ;BB#0 predecessors:[] successors:[_while_begin_325_0]
-	 /*0 # asmjit.py:3845 asmjit.py:3899 demo_moe_jit_to_hip.py:85 */ s_load_dwordx2 s[6:7],s[0:1],0x0  ; 
-	 /*1 # asmjit.py:3845 asmjit.py:3899 demo_moe_jit_to_hip.py:85 */ s_load_dwordx2 s[8:9],s[0:1],0x8  ; 
-	 /*2 # asmjit.py:3845 asmjit.py:3899 demo_moe_jit_to_hip.py:85 */ s_load_dwordx2 s[10:11],s[0:1],0x10  ; 
-	 /*3 # asmjit.py:3845 asmjit.py:3899 demo_moe_jit_to_hip.py:85 */ s_load_dwordx2 s[12:13],s[0:1],0x18  ; 
-	 /*4 # asmjit.py:3845 asmjit.py:3899 demo_moe_jit_to_hip.py:85 */ s_load_dwordx2 s[14:15],s[0:1],0x20  ; 
-	 /*5 # asmjit.py:3845 asmjit.py:3899 demo_moe_jit_to_hip.py:85 */ s_load_dwordx2 s[16:17],s[0:1],0x28  ; 
-	 /*6 # asmjit.py:3852 asmjit.py:3899 demo_moe_jit_to_hip.py:85 */ s_load_dword s18,s[0:1],0x30  ; 
-	 /*7 # asmjit.py:3852 asmjit.py:3899 demo_moe_jit_to_hip.py:85 */ s_load_dword s19,s[0:1],0x34  ; 
-	 /*8 # asmjit.py:3852 asmjit.py:3899 demo_moe_jit_to_hip.py:85 */ s_load_dword s20,s[0:1],0x38  ; 
-	 /*9 # asmjit.py:3714 asmjit.py:3868 asmjit.py:3899 demo_moe_jit_to_hip.py:85 */ v_lshrrev_b32 v1,0x6,v0  ; 
-	 /*10 # asmjit.py:3714 asmjit.py:3868 asmjit.py:3899 demo_moe_jit_to_hip.py:85 */ v_readfirstlane_b32 s21,v1  ; 
-	 /*11 # asmjit.py:3721 asmjit.py:3869 asmjit.py:3899 demo_moe_jit_to_hip.py:85 */ v_and_b32 v2,0x3f,v0  ; 
-	 /*12 # asmjit.py:3872 asmjit.py:3899 demo_moe_jit_to_hip.py:85 */ s_waitcnt  lgkmcnt(0) ; 
+	 /*0 # asmjit.py:3845 asmjit.py:3899 <string>:21 */ s_load_dwordx2 s[6:7],s[0:1],0x0  ; 
+	 /*1 # asmjit.py:3845 asmjit.py:3899 <string>:21 */ s_load_dwordx2 s[8:9],s[0:1],0x8  ; 
+	 /*2 # asmjit.py:3845 asmjit.py:3899 <string>:21 */ s_load_dwordx2 s[10:11],s[0:1],0x10  ; 
+	 /*3 # asmjit.py:3845 asmjit.py:3899 <string>:21 */ s_load_dwordx2 s[12:13],s[0:1],0x18  ; 
+	 /*4 # asmjit.py:3845 asmjit.py:3899 <string>:21 */ s_load_dwordx2 s[14:15],s[0:1],0x20  ; 
+	 /*5 # asmjit.py:3845 asmjit.py:3899 <string>:21 */ s_load_dwordx2 s[16:17],s[0:1],0x28  ; 
+	 /*6 # asmjit.py:3852 asmjit.py:3899 <string>:21 */ s_load_dword s18,s[0:1],0x30  ; 
+	 /*7 # asmjit.py:3852 asmjit.py:3899 <string>:21 */ s_load_dword s19,s[0:1],0x34  ; 
+	 /*8 # asmjit.py:3852 asmjit.py:3899 <string>:21 */ s_load_dword s20,s[0:1],0x38  ; 
+	 /*9 # asmjit.py:3714 asmjit.py:3868 asmjit.py:3899 <string>:21 */ v_lshrrev_b32 v1,0x6,v0  ; 
+	 /*10 # asmjit.py:3714 asmjit.py:3868 asmjit.py:3899 <string>:21 */ v_readfirstlane_b32 s21,v1  ; 
+	 /*11 # asmjit.py:3721 asmjit.py:3869 asmjit.py:3899 <string>:21 */ v_and_b32 v2,0x3f,v0  ; 
+	 /*12 # asmjit.py:3872 asmjit.py:3899 <string>:21 */ s_waitcnt  lgkmcnt(0) ; 
 	 /*13 # moe.py:75 */ v_mov_b32 v4,0x0  ; 
 	 /*14 # moe.py:75 */ v_mov_b32 v5,0x0  ; 
 	 /*15 # moe.py:75 */ v_mov_b32 v6,0x0  ; 

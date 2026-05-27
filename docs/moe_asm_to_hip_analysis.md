@@ -259,19 +259,71 @@ silently return zeros — a hardware behavior specific to MI300X.
 
 ---
 
+## Unified Kernel: with_silu Support
+
+Both hybrid and builtin kernels have been updated to a **unified implementation** that
+supports both gemm1 (with silu activation, split-K, block=256) and gemm2 (no activation,
+block=64) via a runtime `int with_silu` parameter.
+
+### Key Design Decisions
+
+1. **`__attribute__((amdgpu_flat_work_group_size(64, 256)))`** — allows both block sizes
+2. **Parameterized main loop** — `kb_advance`, `ka_advance`, `k_shift` differ per mode
+3. **Branching epilog**:
+   - `with_silu=1`: LDS reduction (4 waves → 1), silu activation, `global_store_short_d16_hi`
+   - `with_silu=0`: topk_weight scaling, bf16 pack, `global_atomic_pk_add_bf16`
+
+### SiLU Path Details (split-K with LDS reduction)
+
+The silu variant uses split-K=4 (4 waves each compute K/4 of the dot product):
+- Each wave writes its partial C[16×32] to LDS at wave-specific offset
+- `__syncthreads()` barrier
+- Wave 0 reads from all 4 LDS positions, reduces, applies silu activation
+- silu(x) = x / (1 + exp(-x)), implemented via `__builtin_amdgcn_expf(-x * log2(e))`
+- Output stored as bf16 via `global_store_short_d16_hi`
+
+### Benchmark Results (Qwen3.5 MoE Shape)
+
+**Shape:** E=513 experts, N=128, K=4096, B=11 tokens, topk=10
+
+| Kernel | gemm1 (silu, K=4096) | gemm2 (no-act, K=64) | Total | vs JIT |
+|--------|---------------------|---------------------|-------|--------|
+| **JIT** | 31.9 µs | 31.0 µs | 62.9 µs | — |
+| **Hybrid** | 45.8 µs (+43.5%) | 28.0 µs (-9.6%) | 73.8 µs | +17.4% |
+| **Builtin** | 27.5 µs (-14.0%) | 27.8 µs (-10.1%) | 55.3 µs | **-12.1%** |
+
+**Correctness:** All PASS (within atomic noise floor for gemm2, within split-K reduction
+noise for gemm1).
+
+### Analysis
+
+- **Builtin wins overall** (-12.1% vs JIT total) — the `__builtin_amdgcn_raw_buffer_load_b128`
+  approach with 2x unrolled pipelining is faster than JIT on both paths
+- **Hybrid silu is slow** (+43.5%) — the C++ LDS reduction epilog doesn't pipeline as well
+  as JIT's hand-scheduled `ds_write_b128`/`ds_read2_b32` with precise waitcnt placement
+- **Hybrid no-silu is fast** (-9.6%) — the simpler atomic epilog maps well to C++
+- The builtin's silu path benefits from compiler register allocation + its 2x unrolled
+  main loop structure providing better memory latency hiding
+
+---
+
 ## Conclusion
 
-**The builtin approach achieves ~95% HIP C++ with only +9.2% overhead vs hand-tuned JIT.**
+**The builtin approach achieves ~95% HIP C++ and is 12.1% FASTER than JIT overall.**
+
+The unified kernel supports both with_silu (gemm1) and no-silu (gemm2) modes via a
+runtime parameter, eliminating the need for separate kernel binaries.
 
 The remaining inline asm is minimal (MFMA + waitcnt = ~8 lines per loop iteration)
 and serves a clear purpose: ensuring the compiler doesn't break the software-pipelined
 load/compute overlap that is critical for memory-bound matrix operations.
 
 For production use, the **builtin approach is recommended** because:
-- Readable, maintainable C++ code
+- Readable, maintainable C++ code (~95% HIP C++)
 - Compiler handles register allocation (no manual VGPR numbering)
 - Easy to modify tiling, loop bounds, or data types
-- Performance within 10% of hand-tuned JIT assembly
+- **Faster than JIT** (-12.1% total for MoE two-pass)
+- Single unified kernel for both silu and non-silu paths
 
 ---
 

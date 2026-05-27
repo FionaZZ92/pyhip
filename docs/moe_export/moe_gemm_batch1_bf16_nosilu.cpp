@@ -9,17 +9,17 @@ __global__ void moe_gemm_batch1(void* p_input,void* p_weight,void* p_output,void
     asm volatile("\n"
 
 "_jit_main:	 ;BB#0 predecessors:[] successors:[_while_begin_325_0]\n"
-"	s_load_dwordx2 s[6:7],s[0:1],0x0  ; # asmjit.py:3845 asmjit.py:3899 demo_moe_jit_to_hip.py:85 alloc 'p_input's[6:7]    s:7(7) v:1(0) a:0(0)    sid:0 p_input,kargs,0,\n"
-"	s_load_dwordx2 s[8:9],s[0:1],0x8  ; # asmjit.py:3845 asmjit.py:3899 demo_moe_jit_to_hip.py:85 alloc 'p_weight's[8:9]    s:9(9) v:1(0) a:0(0)    sid:1 p_weight,kargs,8,\n"
-"	s_load_dwordx2 s[10:11],s[0:1],0x10  ; # asmjit.py:3845 asmjit.py:3899 demo_moe_jit_to_hip.py:85 alloc 'p_output's[10:11]    s:11(11) v:1(0) a:0(0)    sid:2 p_output,kargs,16,\n"
-"	s_load_dwordx2 s[12:13],s[0:1],0x18  ; # asmjit.py:3845 asmjit.py:3899 demo_moe_jit_to_hip.py:85 alloc 'p_topk_ids's[12:13]    s:13(13) v:1(0) a:0(0)    sid:3 p_topk_ids,kargs,24,\n"
-"	s_load_dwordx2 s[14:15],s[0:1],0x20  ; # asmjit.py:3845 asmjit.py:3899 demo_moe_jit_to_hip.py:85 alloc 'p_topk_weight's[14:15]    s:15(15) v:1(0) a:0(0)    sid:4 p_topk_weight,kargs,32,\n"
-"	s_load_dword s5,s[0:1],0x30  ; # asmjit.py:3852 asmjit.py:3899 demo_moe_jit_to_hip.py:85 alloc 'M's5    s:16(15) v:1(0) a:0(0)    sid:5 M,kargs,48,\n"
-"	s_load_dword s16,s[0:1],0x34  ; # asmjit.py:3852 asmjit.py:3899 demo_moe_jit_to_hip.py:85 alloc 'N's16    s:17(16) v:1(0) a:0(0)    sid:6 N,kargs,52,\n"
-"	s_load_dword s17,s[0:1],0x38  ; # asmjit.py:3852 asmjit.py:3899 demo_moe_jit_to_hip.py:85 alloc 'K's17    s:18(17) v:1(0) a:0(0)    sid:7 K,kargs,56,\n"
+"	s_load_dwordx2 s[6:7],s[0:1],0x0  ; # asmjit.py:3845 asmjit.py:3899 <string>:21 alloc 'p_input's[6:7]    s:7(7) v:1(0) a:0(0)    sid:0 p_input,kargs,0,\n"
+"	s_load_dwordx2 s[8:9],s[0:1],0x8  ; # asmjit.py:3845 asmjit.py:3899 <string>:21 alloc 'p_weight's[8:9]    s:9(9) v:1(0) a:0(0)    sid:1 p_weight,kargs,8,\n"
+"	s_load_dwordx2 s[10:11],s[0:1],0x10  ; # asmjit.py:3845 asmjit.py:3899 <string>:21 alloc 'p_output's[10:11]    s:11(11) v:1(0) a:0(0)    sid:2 p_output,kargs,16,\n"
+"	s_load_dwordx2 s[12:13],s[0:1],0x18  ; # asmjit.py:3845 asmjit.py:3899 <string>:21 alloc 'p_topk_ids's[12:13]    s:13(13) v:1(0) a:0(0)    sid:3 p_topk_ids,kargs,24,\n"
+"	s_load_dwordx2 s[14:15],s[0:1],0x20  ; # asmjit.py:3845 asmjit.py:3899 <string>:21 alloc 'p_topk_weight's[14:15]    s:15(15) v:1(0) a:0(0)    sid:4 p_topk_weight,kargs,32,\n"
+"	s_load_dword s5,s[0:1],0x30  ; # asmjit.py:3852 asmjit.py:3899 <string>:21 alloc 'M's5    s:16(15) v:1(0) a:0(0)    sid:5 M,kargs,48,\n"
+"	s_load_dword s16,s[0:1],0x34  ; # asmjit.py:3852 asmjit.py:3899 <string>:21 alloc 'N's16    s:17(16) v:1(0) a:0(0)    sid:6 N,kargs,52,\n"
+"	s_load_dword s17,s[0:1],0x38  ; # asmjit.py:3852 asmjit.py:3899 <string>:21 alloc 'K's17    s:18(17) v:1(0) a:0(0)    sid:7 K,kargs,56,\n"
 "	s_nop 0x1  ; #   sid:8 1,\n"
-"	v_and_b32 v1,0x3f,v0  ; # asmjit.py:3721 asmjit.py:3869 asmjit.py:3899 demo_moe_jit_to_hip.py:85 alloc '_lane_id'v1    s:18(17) v:2(1) a:0(0)    sid:9 _lane_id,63,threadIdx.x,\n"
-"	s_waitcnt  lgkmcnt(0) ; # asmjit.py:3872 asmjit.py:3899 demo_moe_jit_to_hip.py:85   sid:10 \n"
+"	v_and_b32 v1,0x3f,v0  ; # asmjit.py:3721 asmjit.py:3869 asmjit.py:3899 <string>:21 alloc '_lane_id'v1    s:18(17) v:2(1) a:0(0)    sid:9 _lane_id,63,threadIdx.x,\n"
+"	s_waitcnt  lgkmcnt(0) ; # asmjit.py:3872 asmjit.py:3899 <string>:21   sid:10 \n"
 "	v_mov_b32 v4,0x0  ; # moe.py:75 alloc 'C_reg[0:3]'v[4:7]    s:18(17) v:6(7) a:0(0)    sid:11 C_reg[0:3],0,\n"
 "	v_mov_b32 v5,0x0  ; # moe.py:75   sid:12 C_reg[0:3],0,\n"
 "	v_mov_b32 v6,0x0  ; # moe.py:75   sid:13 C_reg[0:3],0,\n"
@@ -190,7 +190,7 @@ __global__ void moe_gemm_batch1(void* p_input,void* p_weight,void* p_output,void
                 :"memory","s0","s1","s2","s3","s4","s5","s6","s7","s8","s9","s10","s11","s12","s13","s14","s15","s16","s17","s18","s20","s21","s22","s23","s24","s25","s26","s27","v0","v1","v2","v3","v4","v5","v6","v7","v8","v9","v10","v11","v12","v13","v14","v16","v17","v18","v19","v20","v21","v22","v23","v24","v25","v26","v27","v28","v29","v30","v31","a0","a1","a2","a3","a4","a5","a6","a7");
     asm volatile(".pushsection .rodata\n"
 "    .align 8\n"
-"    .asciz  \".git:8aec154f33d1e3ca07b82ec9ac2c514d56e621a4\"\n"
+"    .asciz  \".git:c735178e3b65399e04c3e8c6543b5fb044ab36fa\"\n"
 "    .popsection");
 
 }

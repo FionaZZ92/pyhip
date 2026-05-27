@@ -351,11 +351,15 @@ See `moe_gemm_batch1_builtin.cpp` for the full implementation and
 
 ### Summary of HIP C++ Approaches
 
-| Approach | File | Perf vs JIT | HIP C++ % |
-|----------|------|-------------|-----------|
-| Full ASM (JIT export) | `moe_gemm_batch1_generated.cpp` | 0% | 0% |
-| Hybrid (asm main loop) | `moe_gemm_batch1_hybrid.cpp` | +18% | ~48% |
-| **Builtin (recommended)** | `moe_gemm_batch1_builtin.cpp` | **+9.2%** | **~95%** |
+**Unified kernels** (single binary for both silu and non-silu via `int with_silu` param):
+
+| Approach | File | gemm1 (silu) | gemm2 (no-act) | Total vs JIT | HIP C++ % |
+|----------|------|-------------|----------------|--------------|-----------|
+| Full ASM (JIT export) | `moe_export/` | baseline | baseline | — | 0% |
+| Hybrid (asm main loop) | `moe_gemm_batch1_hybrid.cpp` | +43.5% | -9.6% | +17.4% | ~48% |
+| **Builtin (recommended)** | `moe_gemm_batch1_builtin.cpp` | **-14.0%** | **-10.1%** | **-12.1%** | **~95%** |
+
+*Benchmarked on Qwen3.5 MoE shape: E=513, N=128, K=4096, B=11 (MI300X gfx942)*
 
 ### Key technique: `__builtin_amdgcn_raw_buffer_load_b128`
 
@@ -405,3 +409,53 @@ for (k = 0; k + 1 < steps; k += 2) {
 
 4. **LDS size**: If the kernel uses LDS, ensure your launch specifies adequate shared memory
    (or rely on the static `__shared__` declaration in the `.cpp`).
+
+---
+
+## Unified Kernel Architecture (with_silu support)
+
+The latest hybrid and builtin kernels support **both** gemm1 (silu, split-K) and gemm2
+(no activation, atomic output) in a single binary via a runtime `int with_silu` parameter.
+
+### How it works:
+
+```cpp
+__global__ __attribute__((amdgpu_flat_work_group_size(64, 256)))
+void moe_gemm_batch1_kernel(
+    half_t* p_input, half_t* p_weight, half_t* p_output,
+    int* p_topk_ids, float* p_topk_weight, float* p_w_scale,
+    int M, int N, int K,
+    int with_silu   // 0=gemm2(block=64,atomic), 1=gemm1(block=256,split-K,silu)
+) {
+    // Parameterized by with_silu:
+    int kb_advance = with_silu ? 0x1000 : 0x400;  // K-stride for weight
+    int ka_advance = with_silu ? 0x100  : 0x40;   // K-stride for input
+    int k_shift    = with_silu ? 7      : 5;      // loop count = K >> k_shift
+
+    // Main GEMM loop (identical structure, parameterized)
+    ...
+
+    if (with_silu) {
+        // Epilog A: LDS reduction + silu activation + global_store
+        __shared__ float lds_buf[4*16*32];  // 8KB
+        // 4 waves write → barrier → wave 0 reduces → silu → bf16 store
+    } else {
+        // Epilog B: scale + bf16 pack + global_atomic_pk_add_bf16
+    }
+}
+```
+
+### Launch configuration:
+- **gemm1**: grid=[N/2/16, B], block=[256,1,1], with_silu=1
+- **gemm2**: grid=[N/32, B], block=[64,1,1], with_silu=0
+
+### Build command:
+```bash
+/opt/rocm-7.2.0/bin/hipcc --genco --offload-arch=gfx942 -O3 \
+    -o kernel.co moe_gemm_batch1_builtin.cpp
+
+# Unbundle for direct loading:
+/opt/rocm-7.2.0/llvm/bin/clang-offload-bundler --type=o \
+    --targets=hipv4-amdgcn-amd-amdhsa--gfx942 \
+    --input=kernel.co --output=kernel_dev.co --unbundle
+```
